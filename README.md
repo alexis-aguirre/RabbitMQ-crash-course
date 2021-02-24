@@ -9,6 +9,7 @@ Thank you for taking the RabbitMQ ...
 To have the best experience during this Workshop, make sure to
 * Install [Docker](https://docs.docker.com/docker-for-mac/install/)
 * Pull RabbitMQ image `docker pull rabbitmq:3-management`
+* Follow [Producer](./producer/README.md) **Before the workshop** instructions
 
 
 

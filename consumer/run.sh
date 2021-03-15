@@ -1,0 +1,1 @@
+clear && go build -o consumer && ./consumer

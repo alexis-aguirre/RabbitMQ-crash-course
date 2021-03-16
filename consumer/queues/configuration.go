@@ -8,8 +8,11 @@ import (
 )
 
 const (
-	EXCHANGE_TYPE string = "topic"
-	PARKING_SUFIX        = ".parking"
+	EXCHANGE_TYPE           string = "topic"
+	PARKING_SUFIX           string = ".parking"
+	DEAD_LETTER_QUEUE_SUFIX string = ".dead-letter-queue"
+
+	NO_TTL int = 0
 )
 
 var globalConfig util.Config
@@ -39,20 +42,30 @@ func (qm *queueManager) SetupQueues() {
 
 	queueConfig := globalConfig.QueueConfig
 	qm.declareExchange(globalConfig.QueueConfig.ExchangeName)
+	//Dead letter queue
+	qm.declareQueue(globalConfig.QueueConfig.QueueName+DEAD_LETTER_QUEUE_SUFIX, nil)
 
-	qm.declareQueue(globalConfig.QueueConfig.QueueName, nil)
+	//Main queue
+	mainQueueParameters := configureDeadLetterQueue(globalConfig.QueueConfig.ExchangeName, globalConfig.QueueConfig.RoutingKey+DEAD_LETTER_QUEUE_SUFIX, NO_TTL)
+	qm.declareQueue(globalConfig.QueueConfig.QueueName, mainQueueParameters)
+
+	//Parking lot queue
 	parkingLotQueueParameters := configureDeadLetterQueue(globalConfig.QueueConfig.ExchangeName, globalConfig.QueueConfig.RoutingKey, 10000)
 	qm.declareQueue(globalConfig.QueueConfig.QueueName+PARKING_SUFIX, parkingLotQueueParameters)
 
-	qm.bindQueue(queueConfig.QueueName, queueConfig.RoutingKey, queueConfig.ExchangeName, nil)
-	qm.bindQueue(queueConfig.QueueName+PARKING_SUFIX, queueConfig.RoutingKey+PARKING_SUFIX, queueConfig.ExchangeName, nil)
+	qm.bindQueue(queueConfig.QueueName, queueConfig.RoutingKey, queueConfig.ExchangeName, nil)                                                 //Main queue
+	qm.bindQueue(queueConfig.QueueName+PARKING_SUFIX, queueConfig.RoutingKey+PARKING_SUFIX, queueConfig.ExchangeName, nil)                     //Parking lot queue
+	qm.bindQueue(queueConfig.QueueName+DEAD_LETTER_QUEUE_SUFIX, queueConfig.RoutingKey+DEAD_LETTER_QUEUE_SUFIX, queueConfig.ExchangeName, nil) //Dead letter queue
 }
 
 func configureDeadLetterQueue(exchange string, routingKey string, ttl int) amqp.Table {
 	parameters := amqp.Table{}
 	parameters["x-dead-letter-exchange"] = exchange
 	parameters["x-dead-letter-routing-key"] = routingKey
-	parameters["x-message-ttl"] = ttl
+	if ttl != NO_TTL {
+		parameters["x-message-ttl"] = ttl
+	}
+
 	return parameters
 }
 

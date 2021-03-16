@@ -12,6 +12,8 @@ import (
 const (
 	RETRY_COUNT_HEADER = "retry-count"
 
+	MAX_RETRIES = 6
+
 	CONTENT_TYPE_APPLICATION_JSON = "application/json"
 )
 
@@ -32,11 +34,25 @@ func (qm *queueManager) ListenOnQueue() {
 		fmt.Println("Message Received: " + fmt.Sprint(obj))
 
 		if !obj.Validate() {
+			if !qm.messageStillHasRetries(message) {
+				log.Println("Message marked as unprocessable. Moving to DLQ")
+				err := message.Reject(false)
+				if err != nil {
+					log.Println(err)
+				}
+				continue
+			}
 			qm.moveToParkingLot(message)
 		}
-
 		message.Ack(false)
 	}
+}
+
+func (qm *queueManager) messageStillHasRetries(message amqp.Delivery) bool {
+	if message.Headers == nil {
+		return true
+	}
+	return message.Headers[RETRY_COUNT_HEADER].(int32) < MAX_RETRIES
 }
 
 func (qm *queueManager) moveToParkingLot(message amqp.Delivery) {
@@ -44,7 +60,7 @@ func (qm *queueManager) moveToParkingLot(message amqp.Delivery) {
 	queueConfig := globalConfig.QueueConfig
 	var messageHeaders = amqp.Table{}
 	if message.Headers == nil {
-		messageHeaders[RETRY_COUNT_HEADER] = 1
+		messageHeaders[RETRY_COUNT_HEADER] = 2
 	} else {
 		retryCount := message.Headers[RETRY_COUNT_HEADER].(int32)
 		messageHeaders[RETRY_COUNT_HEADER] = retryCount + 1

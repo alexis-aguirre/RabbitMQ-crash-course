@@ -11,6 +11,8 @@ import (
 
 const (
 	RETRY_COUNT_HEADER = "retry-count"
+
+	CONTENT_TYPE_APPLICATION_JSON = "application/json"
 )
 
 func (qm *queueManager) ListenOnQueue() {
@@ -44,12 +46,12 @@ func (qm *queueManager) moveToParkingLot(message amqp.Delivery) {
 	if message.Headers == nil {
 		messageHeaders[RETRY_COUNT_HEADER] = 1
 	} else {
-		retryCount := messageHeaders[RETRY_COUNT_HEADER].(int)
+		retryCount := message.Headers[RETRY_COUNT_HEADER].(int32)
 		messageHeaders[RETRY_COUNT_HEADER] = retryCount + 1
 	}
 
 	err := qm.channel.Publish(queueConfig.ExchangeName, queueConfig.RoutingKey+PARKING_SUFIX, false, false, amqp.Publishing{
-		ContentType: "application/json",
+		ContentType: CONTENT_TYPE_APPLICATION_JSON,
 		Body:        message.Body,
 		Headers:     messageHeaders,
 	})

@@ -9,6 +9,7 @@ import (
 
 const (
 	EXCHANGE_TYPE string = "topic"
+	PARKING_SUFIX        = ".parking"
 )
 
 var globalConfig util.Config
@@ -39,7 +40,9 @@ func (qm *queueManager) SetupQueues() {
 	queueConfig := globalConfig.QueueConfig
 	qm.declareExchange(globalConfig.QueueConfig.ExchangeName)
 	qm.declareQueue(globalConfig.QueueConfig.QueueName, nil)
+	qm.declareQueue(globalConfig.QueueConfig.QueueName+PARKING_SUFIX, nil)
 	qm.bindQueue(queueConfig.QueueName, queueConfig.RoutingKey, queueConfig.ExchangeName, nil)
+	qm.bindQueue(queueConfig.QueueName+PARKING_SUFIX, queueConfig.RoutingKey+PARKING_SUFIX, queueConfig.ExchangeName, nil)
 }
 
 func createRabbitChannel(connection *amqp.Connection) *amqp.Channel {

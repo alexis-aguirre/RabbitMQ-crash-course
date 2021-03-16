@@ -6,6 +6,11 @@ import (
 	"log"
 
 	"github.com/alexis-aguirre/RabbitMQ-crash-course/dto"
+	"github.com/streadway/amqp"
+)
+
+const (
+	RETRY_COUNT_HEADER = "retry-count"
 )
 
 func (qm *queueManager) ListenOnQueue() {
@@ -24,7 +29,33 @@ func (qm *queueManager) ListenOnQueue() {
 
 		fmt.Println("Message Received: " + fmt.Sprint(obj))
 
-		message.Ack(false)
+		if !obj.Validate() {
+			qm.moveToParkingLot(message)
+		}
 
+		message.Ack(false)
 	}
+}
+
+func (qm *queueManager) moveToParkingLot(message amqp.Delivery) {
+	log.Println("Moving message to parking lot: " + fmt.Sprint(string(message.Body)))
+	queueConfig := globalConfig.QueueConfig
+	var messageHeaders = amqp.Table{}
+	if message.Headers == nil {
+		messageHeaders[RETRY_COUNT_HEADER] = 1
+	} else {
+		retryCount := messageHeaders[RETRY_COUNT_HEADER].(int)
+		messageHeaders[RETRY_COUNT_HEADER] = retryCount + 1
+	}
+
+	err := qm.channel.Publish(queueConfig.ExchangeName, queueConfig.RoutingKey+PARKING_SUFIX, false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        message.Body,
+		Headers:     messageHeaders,
+	})
+
+	if err != nil {
+		log.Println("Error: " + err.Error())
+	}
+
 }

@@ -9,6 +9,7 @@ import (
 
 const (
 	EXCHANGE_TYPE string = "topic"
+	PARKING_SUFIX        = ".parking"
 )
 
 var globalConfig util.Config
@@ -38,8 +39,21 @@ func (qm *queueManager) SetupQueues() {
 
 	queueConfig := globalConfig.QueueConfig
 	qm.declareExchange(globalConfig.QueueConfig.ExchangeName)
+
 	qm.declareQueue(globalConfig.QueueConfig.QueueName, nil)
+	parkingLotQueueParameters := configureDeadLetterQueue(globalConfig.QueueConfig.ExchangeName, globalConfig.QueueConfig.RoutingKey, 10000)
+	qm.declareQueue(globalConfig.QueueConfig.QueueName+PARKING_SUFIX, parkingLotQueueParameters)
+
 	qm.bindQueue(queueConfig.QueueName, queueConfig.RoutingKey, queueConfig.ExchangeName, nil)
+	qm.bindQueue(queueConfig.QueueName+PARKING_SUFIX, queueConfig.RoutingKey+PARKING_SUFIX, queueConfig.ExchangeName, nil)
+}
+
+func configureDeadLetterQueue(exchange string, routingKey string, ttl int) amqp.Table {
+	parameters := amqp.Table{}
+	parameters["x-dead-letter-exchange"] = exchange
+	parameters["x-dead-letter-routing-key"] = routingKey
+	parameters["x-message-ttl"] = ttl
+	return parameters
 }
 
 func createRabbitChannel(connection *amqp.Connection) *amqp.Channel {
@@ -54,6 +68,7 @@ func (qm *queueManager) declareQueue(queueName string, args amqp.Table) {
 	_, err := qm.channel.QueueDeclare(queueName, true, false, false, false, args)
 
 	if err != nil {
+		log.Println(err)
 		log.Fatal("Cannot declare queue " + queueName)
 	}
 	log.Println("Queue '" + queueName + "' created")

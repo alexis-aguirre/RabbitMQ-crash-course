@@ -1,7 +1,9 @@
 from json import dumps, loads, decoder
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from http import HTTPStatus
+
 from processor import process_image
+from app import PublishManager
 
 
 def process_handler(handler: BaseHTTPRequestHandler):
@@ -26,6 +28,10 @@ def process_handler(handler: BaseHTTPRequestHandler):
     if not found_plate:
         not_found(handler)
         return
+
+    manager = PublishManager(exchange='storage-exchange', routing_key='storage-queue')
+    manager.publish(payload)
+    manager.close_connection()
 
     success_response(handler)
     handler.wfile.write(bytes(dumps(payload), "utf-8"))

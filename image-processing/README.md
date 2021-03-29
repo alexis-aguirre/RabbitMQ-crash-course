@@ -1,8 +1,8 @@
-# Producer
+# Processing Service
 
 ## Introduction
 
-Welcome to the producer 🤠 
+Welcome to the processing service 🥶
 
 ## Before the workshop
 
@@ -16,19 +16,20 @@ Make sure to:
 
 That's all, see you in the workshop
 
+
 ## Start the server
 
-To start the service at port 8080
+To start the service at port 8082 
 
     python server.py
 
 ## Endpoint
 
-The available endpoint is `http://localhost:8080/webhook`
+The available endpoint is `http://localhost:8082/process`
 
 ```sh
-curl --request POST 
-  --url http://localhost:8080/webhook \
+curl --request POST \
+  --url http://localhost:8082/process \
   --header 'Content-Type: application/json' \
   --data '{
     "id": 20,

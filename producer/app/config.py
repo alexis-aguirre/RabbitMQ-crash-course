@@ -6,7 +6,7 @@ connection_params = pika.ConnectionParameters(
     credentials=credentials,
 )
 
-broker_connection = pika.BlockingConnection(connection_params)
 
-channel = broker_connection.channel()
-print("Hello RabbitMQ")
+def open_connection():
+    return pika.BlockingConnection(connection_params)
+

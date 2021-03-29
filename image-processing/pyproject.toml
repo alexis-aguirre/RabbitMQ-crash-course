@@ -6,6 +6,7 @@ authors = ["alexis-aguirre <alexis.aguirre@wizeline.com>", "soyantonio-w <jesus.
 
 [tool.poetry.dependencies]
 python = "^3.9"
+pika = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 

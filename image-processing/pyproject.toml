@@ -6,11 +6,8 @@ authors = ["alexis-aguirre <alexis.aguirre@wizeline.com>", "soyantonio-w <jesus.
 
 [tool.poetry.dependencies]
 python = "^3.9"
-opencv-python = "^4.5.1"
-pytesseract = "^0.3.7"
 
 [tool.poetry.dev-dependencies]
-matplotlib = "^3.3.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

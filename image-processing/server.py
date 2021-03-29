@@ -52,8 +52,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/process":
             process_handler(self)
         else:
-            self.send_response(404)
-            self.end_headers()
+            not_found(self)
 
 
 def run(server_class=HTTPServer, handler_class=Handler):

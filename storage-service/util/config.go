@@ -7,9 +7,8 @@ import (
 var globalConfig Config
 
 type Config struct {
-	RabbitConfig   rabbitConfig
-	QueueConfig    queueConfig
-	ServicesConfig servicesConfig
+	RabbitConfig rabbitConfig
+	QueueConfig  queueConfig
 }
 
 type rabbitConfig struct {
@@ -25,10 +24,6 @@ type queueConfig struct {
 	RoutingKey   string `mapstructure:"QUEUE_ROUTING_KEY"`
 }
 
-type servicesConfig struct {
-	ImageProcessingUrl string `mapstructure:"IMAGE_PROCESSING_URL"`
-}
-
 func LoadConfig(path string) (Config, error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName(".env")
@@ -37,7 +32,6 @@ func LoadConfig(path string) (Config, error) {
 
 	queueConf := queueConfig{}
 	rabbitConf := rabbitConfig{}
-	servicesConf := servicesConfig{}
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -54,14 +48,8 @@ func LoadConfig(path string) (Config, error) {
 		return globalConfig, err
 	}
 
-	err = viper.Unmarshal(&servicesConf)
-	if err != nil {
-		return globalConfig, err
-	}
-
 	globalConfig.QueueConfig = queueConf
 	globalConfig.RabbitConfig = rabbitConf
-	globalConfig.ServicesConfig = servicesConf
 	return globalConfig, nil
 
 }

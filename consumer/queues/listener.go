@@ -6,6 +6,9 @@ import (
 	"log"
 
 	"github.com/alexis-aguirre/RabbitMQ-crash-course/dto"
+	"github.com/alexis-aguirre/RabbitMQ-crash-course/services/imageProcessingService"
+	"github.com/alexis-aguirre/RabbitMQ-crash-course/util"
+
 	"github.com/streadway/amqp"
 )
 
@@ -16,6 +19,8 @@ const (
 )
 
 func (qm *queueManager) ListenOnQueue() {
+	globalConfig := util.GetConfig()
+	imageClient := imageProcessingService.NewImageProcessingClient(globalConfig.ServicesConfig.ImageProcessingUrl)
 	queueConfig := globalConfig.QueueConfig
 	log.Println("Listening on queue '" + queueConfig.QueueName + "'")
 
@@ -29,11 +34,18 @@ func (qm *queueManager) ListenOnQueue() {
 		obj := dto.ImageReport{}
 		json.Unmarshal(message.Body, &obj)
 
-		fmt.Println("Message Received: " + fmt.Sprint(obj))
-
+		log.Println("Message Received: " + fmt.Sprint(obj))
 		if !obj.Validate() {
 			qm.moveToParkingLot(message)
+			continue
 		}
+		err = imageClient.ProcessPlate(obj)
+		if err != nil {
+			log.Println(err)
+			qm.moveToParkingLot(message)
+			continue
+		}
+		log.Println("Processed ", fmt.Sprint(obj))
 
 		message.Ack(false)
 	}

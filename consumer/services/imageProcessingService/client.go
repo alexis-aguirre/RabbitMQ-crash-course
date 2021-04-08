@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 func (client *ImageProcessingClient) ProcessPlate(data interface{}) error {
+	log.Println("Sending ", fmt.Sprint(data)+" to image processing service...")
 	reqBody, err := json.Marshal(data)
 	if err != nil {
 		print(err)

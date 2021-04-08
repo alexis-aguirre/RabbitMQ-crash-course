@@ -35,16 +35,17 @@ func (qm *queueManager) ListenOnQueue() {
 		json.Unmarshal(message.Body, &obj)
 
 		log.Println("Message Received: " + fmt.Sprint(obj))
+		if !obj.Validate() {
+			qm.moveToParkingLot(message)
+			continue
+		}
 		err = imageClient.ProcessPlate(obj)
 		if err != nil {
 			log.Println(err)
-		} else {
-			log.Println("Processed ", fmt.Sprint(obj))
-		}
-
-		if !obj.Validate() {
 			qm.moveToParkingLot(message)
+			continue
 		}
+		log.Println("Processed ", fmt.Sprint(obj))
 
 		message.Ack(false)
 	}

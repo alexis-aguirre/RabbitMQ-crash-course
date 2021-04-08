@@ -1,0 +1,1 @@
+clear && go build -o storage && ./storage

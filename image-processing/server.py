@@ -1,6 +1,8 @@
 from json import dumps, loads, decoder
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from http import HTTPStatus
+from time import sleep
+import random
 
 from processor import process_image
 from app import PublishManager
@@ -29,7 +31,9 @@ def process_handler(handler: BaseHTTPRequestHandler):
         not_found(handler)
         return
 
-    manager = PublishManager(exchange='storage-exchange', routing_key='storage-queue')
+    random_sleep()
+    manager = PublishManager(exchange='storage-exchange',
+                             routing_key='storage-queue')
     manager.publish(payload)
     manager.close_connection()
 
@@ -65,6 +69,11 @@ def run(server_class=HTTPServer, handler_class=Handler):
     server_address = ('', 8082)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
+
+
+def random_sleep():
+    delay = random.randrange(1, 10)
+    sleep(5+delay)
 
 
 if __name__ == '__main__':

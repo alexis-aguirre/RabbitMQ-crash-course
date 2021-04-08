@@ -2,14 +2,15 @@
 
 ## Introduction
 
-Thank you for taking the RabbitMQ ...
+Thank you for taking the RabbitMQ crash course. 
 
 ## Prerequisites
 
 To have the best experience during this Workshop, make sure to
+* Install [Go(lang)](https://golang.org/dl/) v1.15 or above
 * Install [Docker](https://docs.docker.com/docker-for-mac/install/)
 * Pull RabbitMQ image `docker pull rabbitmq:3-management`
-* Follow [Producer](./producer/README.md) **Before the workshop** instructions
+* Follow [Producer](./producer/README.md) and [Consumer](./consumer/README.md) instructions **Before the workshop**
 
 
 

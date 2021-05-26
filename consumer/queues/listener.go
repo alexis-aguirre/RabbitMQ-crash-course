@@ -53,7 +53,7 @@ func (qm *queueManager) ListenOnQueue() {
 			continue
 		}
 
-		if err = imageClient.ProcessPlate(obj); err != nil {
+		if err := imageClient.ProcessPlate(obj); err != nil {
 			log.Println(err)
 			if !qm.messageStillHasRetries(message) {
 				log.Println("Message marked as unprocessable. Moving to DLQ")

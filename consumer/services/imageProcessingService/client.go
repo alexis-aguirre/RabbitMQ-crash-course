@@ -3,8 +3,8 @@ package imageProcessingService
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -24,12 +24,7 @@ func (client *ImageProcessingClient) ProcessPlate(data interface{}) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return err
-	}
-
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
+		return errors.New("cannot process image")
 	}
 
 	return nil

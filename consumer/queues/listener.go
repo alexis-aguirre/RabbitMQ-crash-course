@@ -37,14 +37,9 @@ func (qm *queueManager) ListenOnQueue() {
 		json.Unmarshal(message.Body, &obj)
 
 		log.Println("Message Received: " + fmt.Sprint(obj))
-		err = imageClient.ProcessPlate(obj)
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.Println("Processed ", fmt.Sprint(obj))
-		}
 
 		if !obj.Validate() {
+			log.Println("Cannot validate file")
 			if !qm.messageStillHasRetries(message) {
 				log.Println("Message marked as unprocessable. Moving to DLQ")
 				err := message.Reject(false)
@@ -54,7 +49,25 @@ func (qm *queueManager) ListenOnQueue() {
 				continue
 			}
 			qm.moveToParkingLot(message)
+			message.Ack(false)
+			continue
 		}
+
+		if err = imageClient.ProcessPlate(obj); err != nil {
+			log.Println(err)
+			if !qm.messageStillHasRetries(message) {
+				log.Println("Message marked as unprocessable. Moving to DLQ")
+				err := message.Reject(false)
+				if err != nil {
+					log.Println(err)
+				}
+				continue
+			}
+			qm.moveToParkingLot(message)
+			message.Ack(false)
+			continue
+		}
+		log.Println("Processed ", fmt.Sprint(obj))
 		message.Ack(false)
 	}
 }

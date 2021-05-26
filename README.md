@@ -28,3 +28,16 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-manag
 ```
 docker exec -it rabbitmq /bin/bash
 ```
+
+## Project architecture
+
+In this workshop, we will develop a system with the following architecture
+![Project architecture](./docs/architecture.png)
+
+## Branches
+
+The project is divided in three sections (branches) which contain distinct steps of the implementation
+
+- main / final-project: the finished project. Implements fault tolerance
+- skeleton : project skeleton. The basic project, only implements reading from a queue
+- mid-project: the mid step of the project. implements dead letter queues and parking queues

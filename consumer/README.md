@@ -8,7 +8,7 @@ Note: This instructions are valid for Consumer and Storage-service
 
 - Install the dependencies
 ```
-$ go install
+$ go get
 ```
 - Compile and run the service
 ```
